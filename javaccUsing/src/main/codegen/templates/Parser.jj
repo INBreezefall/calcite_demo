@@ -1,0 +1,88 @@
+/*
+ * Author: INBreeze
+ */
+
+// 1.javacc options
+options {
+    STATIC = false;
+    IGNORE_CASE = true;
+}
+
+// 2.java class define
+PARSER_BEGIN(SimpleSelectParser)
+package com.inbreeze.sql.parser;
+import java.io.*;
+public class SimpleSelectParser {
+    private String sql;
+    public void parse() throws ParseException {
+        SelectExpr(sql);
+    }
+    public SimpleSelectParser(String expr) {
+        this((Reader)(new StringReader(expr)));
+        this.sql = expr;
+    }
+}
+PARSER_END(SimpleSelectParser)
+
+// 3.parser function
+void SelectExpr(String expr): {
+    // 局部变量定义
+    int res;
+}
+{
+    // TOKEN 流解析/识别/消耗过程
+    <SELECT>
+    res = Expression()
+    {
+        // JavaCode
+        System.out.println(expr + " = " + res);
+    }
+}
+
+int Expression(): {
+    int res = 0;
+    int v;
+}
+{
+    // 解析 一个词组 TOKEN 为数值变量
+    res = Number()
+    // if else | switch
+    (
+        // 若 解析 一个词组 TOKEN 为 <ADD> 关键字
+        <ADD>
+        // 解析 一个词组 TOKEN 为数值变量
+        v = Number()
+        // JavaCode 返回结果
+        {res += v;}
+    |
+        <SUB>
+        v = Number()
+        {res -= v;}
+    )*
+    {return res;}
+}
+
+int Number(): {
+    Token t;
+}
+{
+    t = <NUMBER>
+    {
+        return Integer.parseInt(t.image);
+    }
+}
+
+// 4.TOKEN
+SKIP: {
+    " "
+    | "\t"
+    | "\n"
+    | "\r"
+    | "\r\n"
+}
+TOKEN: {
+    < SELECT: "SELECT" >
+    | < NUMBER: (["0"-"9"])+ >
+    | < ADD: "+" >
+    | < SUB: "-" >
+}
